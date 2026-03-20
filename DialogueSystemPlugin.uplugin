@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1",
+	"FriendlyName": "DialogueSystemPlugin",
+	"Description": "Data oriented dialogue system plugin.",
+	"Category": "Dialogue",
+	"CreatedBy": "KeremKaanTekelek",
+	"CreatedByURL": "https://github.com/keremtekelek",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "DialogueSystemPlugin",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault"
+		}
+	]
+}
