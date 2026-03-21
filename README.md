@@ -137,6 +137,7 @@ This project is currently in the Prototype phase. Planned improvements for the n
 ## ⬇️ Installation
 
 - **Clone or download the project. After that you should place the folder into the Plugins directory of your UE5 project.**
+- **Add the 'Interface_MainCharacter' interface to your Player Character.**
 - **Add the AC_InteractionSystem actor component to your Player Character.**
 - **Create two separate Input Actions for "Interact" and "Skip Dialogue", then add these Input Actions to your Input Mapping Context.**
 - **Then, perform the operation shown in the image below within your player character blueprint.**
