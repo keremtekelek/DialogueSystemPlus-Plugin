@@ -151,6 +151,7 @@ void UNPC_DialogueNode::PostEditImport()
 			this->NPC_Row.NextChoiceID = NAME_None;
 			this->NPC_Row.NextDialogueID = NAME_None;
 			this->NPC_Row.TargetLevel = nullptr;
+			this->NPC_Row.HasToRequireEvents.Reset();
 		}
 	}
 }

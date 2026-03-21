@@ -18,6 +18,7 @@ void USubsystem_Dialogue::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 	
 	USubsystem_EventManager* eventSubsystem= Collection.InitializeDependency<USubsystem_EventManager>();
+	//PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	if (eventSubsystem)
 	{
@@ -332,10 +333,17 @@ FName USubsystem_Dialogue::ScoreNPC_Dialogues()
 			{
 				continue;
 			}
+			
+			
+			if (!DialogueRow->HasToRequireEvents.IsEmpty() && !ProcessedGlobalEvents.HasAll(DialogueRow->HasToRequireEvents))
+			{
+				continue;
+			}
+			
 
-			FGameplayTagContainer RequiredTags = DialogueRow->RelatedGlobalEvents;
+			FGameplayTagContainer RelatedTags = DialogueRow->RelatedGlobalEvents;
         
-			for (auto It = RequiredTags.CreateConstIterator(); It; ++It)
+			for (auto It = RelatedTags.CreateConstIterator(); It; ++It)
 			{
 				if (ProcessedGlobalEvents.HasTag(*It))
 				{
@@ -434,6 +442,7 @@ void USubsystem_Dialogue::GetBestDialogue_RowProperties(const FNPC_Dialogues& Be
 	NPC_NextDialogueID = BestNPC_Row.NextDialogueID;
 	NPC_NextChoiceID = BestNPC_Row.NextChoiceID;
 	NPC_ConversationPartner_Name = BestNPC_Row.SpeakerName;
+	NPC_HasToRequireEvents = BestNPC_Row.HasToRequireEvents;
 }
 
 
@@ -721,6 +730,8 @@ void USubsystem_Dialogue::HandleGameEvent(FGameplayTag EventTag)
 //Handles choice UI screen and cursor
 void USubsystem_Dialogue::OpenOrCloseCursor(bool OpenOrCloseValue)
 {
+	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	
 	if (OpenOrCloseValue)
 	{
 		FInputModeUIOnly InputMode;
@@ -749,7 +760,7 @@ void USubsystem_Dialogue::LockOrReleaseTheMainCharacter(bool LockOrReleaseValue)
 		{
 			PlayerController->SetIgnoreMoveInput(true);
 			PlayerController->StopMovement();
-			//MainCharacter->GetCharacterMovement()->StopMovementImmediately();
+			
 		}
 	
 		// releasing the main character
@@ -775,6 +786,8 @@ FString USubsystem_Dialogue::GetCurrentMap()
 	
 	return CurrentMapName;
 }
+
+
 
 void USubsystem_Dialogue::PrintString(const FString& Message, float Time, FColor Color)
 {

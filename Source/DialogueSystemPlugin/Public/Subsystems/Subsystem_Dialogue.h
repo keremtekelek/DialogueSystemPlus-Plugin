@@ -124,6 +124,9 @@ public:
 
 	UPROPERTY()
 	FGameplayTagContainer NPC_EventsToTrigger;
+	
+	UPROPERTY()
+	FGameplayTagContainer NPC_HasToRequireEvents;
 
 	UPROPERTY()
 	FName NPC_ConversationPartner_Name;
@@ -306,6 +309,8 @@ public:
 	
 	UFUNCTION()
 	FString GetCurrentMap();
+	
+	
 	
 	UFUNCTION()
 	static void PrintString(const FString& Message, float time, FColor Color);

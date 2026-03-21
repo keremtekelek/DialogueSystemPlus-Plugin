@@ -53,6 +53,9 @@ struct FNPC_Dialogues : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTagContainer EventsToTrigger;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FGameplayTagContainer HasToRequireEvents;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ENPCMood DesiredNPC_Mood;

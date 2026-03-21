@@ -139,6 +139,7 @@ void UMainCharacterDialogue_Node::PostEditImport()
 			this->MC_DialogueRow.NextDialogueID = NAME_None;
 			this->MC_DialogueRow.NextChoiceID = NAME_None;
 			this->MC_DialogueRow.TargetLevel = nullptr;
+			this->MC_DialogueRow.HasToRequireEvents.Reset();
 		}
 	}
 	
