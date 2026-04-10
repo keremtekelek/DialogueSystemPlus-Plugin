@@ -218,6 +218,9 @@ public:
 	
 	UPROPERTY()
 	FName LastDialogueNPC_Name;
+
+	UPROPERTY()
+	FName PlayerCharacter_Name;
 	
 	//UPROPERTY()
 	//TSoftObjectPtr<UDataTable> DT_Disturb;

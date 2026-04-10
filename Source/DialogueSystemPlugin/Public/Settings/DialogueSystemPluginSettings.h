@@ -21,4 +21,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Data Tables")
 	TSoftObjectPtr<UDataTable> DT_Disturb;
+
+	UPROPERTY(EditAnywhere, Config, Category = "Player Character Settings")
+	FName PlayerCharacterName;
 };

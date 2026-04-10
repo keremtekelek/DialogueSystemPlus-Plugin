@@ -40,6 +40,7 @@ void USubsystem_Dialogue::Initialize(FSubsystemCollectionBase& Collection)
 	{
 		DataTable_MainCharacter = Settings->DT_MainCharacterChoices.LoadSynchronous();
 		DataTable_MainCharacterDialogue = Settings->DT_MainCharacterDialogues.LoadSynchronous();
+		PlayerCharacter_Name = Settings->PlayerCharacterName;
 	}
 }
 
@@ -499,7 +500,7 @@ void USubsystem_Dialogue::ShowNextDialogueAfterSeconds(FName NextDialogueID)
 		}
 		else
 		{
-			ShowDialogue(FoundRow->DialogueText,NAME_None);
+			ShowDialogue(FoundRow->DialogueText,PlayerCharacter_Name);
 		}
 
 		ProcessedDialogues.AddUnique(FoundRow->DialogueID);
@@ -532,7 +533,7 @@ void USubsystem_Dialogue::ShowNextDialogueAfterSeconds(FName NextDialogueID)
 		}
 		else
 		{
-			ShowDialogue(FoundRow->DialogueText,NAME_None);
+			ShowDialogue(FoundRow->DialogueText,PlayerCharacter_Name);
 		}
 		
 		ProcessedDialogues.AddUnique(FoundRow->DialogueID);
@@ -613,9 +614,9 @@ void USubsystem_Dialogue::CloseDialogueAfterSeconds()
 
 void USubsystem_Dialogue::ShowDialogue(FText DialogueToShow,FName OwnerOfDialogue)
 {
-	if (AC_DialogueSystem->ExposeRealName)
+	if (PlayerCharacter_Name == OwnerOfDialogue)
 	{
-		FString Owner = AC_DialogueSystem->NPC_RealName.ToString();
+		FString Owner = PlayerCharacter_Name.ToString();
 
 		FText OwnerText = FText::FromString(Owner);
 		FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
@@ -624,14 +625,25 @@ void USubsystem_Dialogue::ShowDialogue(FText DialogueToShow,FName OwnerOfDialogu
 	}
 	else
 	{
-		FString Owner = AC_DialogueSystem->NPC_OfficialName.ToString();
+		if (AC_DialogueSystem->ExposeRealName)
+		{
+			FString Owner = AC_DialogueSystem->NPC_RealName.ToString();
 
-		FText OwnerText = FText::FromString(Owner);
-		FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
+			FText OwnerText = FText::FromString(Owner);
+			FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
 
-		WBP_Dialogue->ShowDialogue(Result);
+			WBP_Dialogue->ShowDialogue(Result);
+		}
+		else
+		{
+			FString Owner = AC_DialogueSystem->NPC_OfficialName.ToString();
+
+			FText OwnerText = FText::FromString(Owner);
+			FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
+
+			WBP_Dialogue->ShowDialogue(Result);
+		}
 	}
-	
 }
 
 void USubsystem_Dialogue::SkipDialogue()
