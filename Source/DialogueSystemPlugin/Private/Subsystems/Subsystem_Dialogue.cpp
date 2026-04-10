@@ -781,6 +781,17 @@ void USubsystem_Dialogue::LockOrReleaseTheMainCharacter(bool LockOrReleaseValue)
 
 FString USubsystem_Dialogue::GetCurrentMap()
 {
+	ULevel* NPCLevel = AC_DialogueSystem->GetOwner()->GetLevel();
+		
+	if (NPCLevel && NPCLevel->GetOuter())
+	{
+		FString NPCMapName = NPCLevel->GetOuter()->GetName();
+			
+		NPCMapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+			
+		return FPackageName::GetShortName(NPCMapName);
+	}
+
 	FString CurrentMapName = GetWorld()->GetMapName();
 	CurrentMapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
 	

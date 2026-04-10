@@ -8,6 +8,7 @@
 #include "Sound/SoundBase.h"
 #include "GameplayTagContainer.h"
 #include "GameplayTagsManager.h"
+#include "Misc/PackageName.h"
 #include "CollisionQueryParams.h"
 #include "Subsystem_Dialogue.generated.h"
 
