@@ -93,7 +93,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TArray<FName> ProcessedChoices;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FGameplayTagContainer ProcessedGlobalEvents;
 	
 	// Score Values
