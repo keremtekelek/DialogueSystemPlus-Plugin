@@ -29,7 +29,12 @@ void UDialogueWriter::GenerateDialogueData()
 	VisitedMC_Nodes.Empty();
 	VisitedMC_DialogueNodes.Empty();
 	RootNPC_Nodes.Empty(); 
-	ActiveIDs.Empty(); 
+	ActiveIDs.Empty();
+
+	//can be adjusted
+	ActiveNPC_IDs.Empty();
+
+	
 	
 	// Checking for if graph has some nodes.
 	bool GraphHasNodes = false;
@@ -151,6 +156,7 @@ void UDialogueWriter::GenerateDialogueData()
 	for (UNPC_DialogueNode* Node : RootNPC_Nodes)
 	{
 		Node->NPC_Row.IsRoot = true;
+		ActiveNPC_IDs.Add(Node->NPC_Row.NPC_ID); // can be adjusted
 		HandleAutomatedData(Node);
 	}
 
@@ -205,6 +211,8 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 		
 		ActiveIDs.Add(NPCNode->NPC_Row.DialogueID);
 		
+		
+		
 		UEdGraphPin* ExecPin = NPCNode->FindPin(UEdGraphSchema_K2::PN_Then);
 		if (ExecPin && ExecPin->LinkedTo.Num() > 0) 
 		{
@@ -218,9 +226,9 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 					{
 						NPCNode->NPC_Row.NextChoiceID = Next_MainCharacterChoicesNode->AllChoice_Row.Choice1.ChoiceID1;
 						
-						Next_MainCharacterChoicesNode->AllChoice_Row.Choice1.SpeakerName = NPCNode->NPC_Row.SpeakerName;
-						Next_MainCharacterChoicesNode->AllChoice_Row.Choice2.SpeakerName = NPCNode->NPC_Row.SpeakerName;
-						Next_MainCharacterChoicesNode->AllChoice_Row.Choice3.SpeakerName = NPCNode->NPC_Row.SpeakerName;
+						Next_MainCharacterChoicesNode->AllChoice_Row.Choice1.NPC_ID = NPCNode->NPC_Row.NPC_ID;
+						Next_MainCharacterChoicesNode->AllChoice_Row.Choice2.NPC_ID = NPCNode->NPC_Row.NPC_ID;
+						Next_MainCharacterChoicesNode->AllChoice_Row.Choice3.NPC_ID = NPCNode->NPC_Row.NPC_ID;
 						
 						Next_MainCharacterChoicesNode->AllChoice_Row.Choice1.TargetLevel = NPCNode->NPC_Row.TargetLevel;
 						Next_MainCharacterChoicesNode->AllChoice_Row.Choice2.TargetLevel = NPCNode->NPC_Row.TargetLevel;
@@ -233,7 +241,7 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 					{
 						NPCNode->NPC_Row.NextDialogueID = Next_NPCNode->NPC_Row.DialogueID;
 						
-						Next_NPCNode->NPC_Row.SpeakerName = NPCNode->NPC_Row.SpeakerName;
+						Next_NPCNode->NPC_Row.NPC_ID = NPCNode->NPC_Row.NPC_ID;
 						Next_NPCNode->NPC_Row.TargetLevel = NPCNode->NPC_Row.TargetLevel;
 						
 						AddToDataTable(NPCNode);
@@ -243,7 +251,7 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 					{
 						NPCNode->NPC_Row.NextDialogueID = Next_PlayerDialogueNode->MC_DialogueRow.DialogueID;
 						
-						Next_PlayerDialogueNode->MC_DialogueRow.SpeakerName = NPCNode->NPC_Row.SpeakerName;
+						Next_PlayerDialogueNode->MC_DialogueRow.NPC_ID = NPCNode->NPC_Row.NPC_ID;
 						Next_PlayerDialogueNode->MC_DialogueRow.TargetLevel = NPCNode->NPC_Row.TargetLevel;
 						
 						AddToDataTable(NPCNode);
@@ -292,21 +300,21 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 							if (i == 0) // Choice1
 							{
 								MainCharacterChoicesNode->AllChoice_Row.Choice1.NextDialogueID = Next_NPCNode->NPC_Row.DialogueID;
-								Next_NPCNode->NPC_Row.SpeakerName = MainCharacterChoicesNode->AllChoice_Row.Choice1.SpeakerName;
+								Next_NPCNode->NPC_Row.NPC_ID = MainCharacterChoicesNode->AllChoice_Row.Choice1.NPC_ID;
 								Next_NPCNode->NPC_Row.TargetLevel = MainCharacterChoicesNode->AllChoice_Row.Choice1.TargetLevel;
 							}
 							
 							else if (i == 1) // Choice 2
 							{
 								MainCharacterChoicesNode->AllChoice_Row.Choice2.NextDialogueID = Next_NPCNode->NPC_Row.DialogueID;
-								Next_NPCNode->NPC_Row.SpeakerName = MainCharacterChoicesNode->AllChoice_Row.Choice2.SpeakerName;
+								Next_NPCNode->NPC_Row.NPC_ID = MainCharacterChoicesNode->AllChoice_Row.Choice2.NPC_ID;
 								Next_NPCNode->NPC_Row.TargetLevel = MainCharacterChoicesNode->AllChoice_Row.Choice2.TargetLevel;
 							}
 							
 							else if (i == 2) // Choice 3
 							{
 								MainCharacterChoicesNode->AllChoice_Row.Choice3.NextDialogueID = Next_NPCNode->NPC_Row.DialogueID;
-								Next_NPCNode->NPC_Row.SpeakerName = MainCharacterChoicesNode->AllChoice_Row.Choice3.SpeakerName;
+								Next_NPCNode->NPC_Row.NPC_ID = MainCharacterChoicesNode->AllChoice_Row.Choice3.NPC_ID;
 								Next_NPCNode->NPC_Row.TargetLevel = MainCharacterChoicesNode->AllChoice_Row.Choice3.TargetLevel;
 							}
 							
@@ -344,7 +352,7 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 					if (UNPC_DialogueNode* Next_NPCNode = Cast<UNPC_DialogueNode>(LinkedPin->GetOwningNode()))
 					{
 						MainCharacterDialogueNode->MC_DialogueRow.NextDialogueID = Next_NPCNode->NPC_Row.DialogueID;
-						Next_NPCNode->NPC_Row.SpeakerName = MainCharacterDialogueNode->MC_DialogueRow.SpeakerName;
+						Next_NPCNode->NPC_Row.NPC_ID = MainCharacterDialogueNode->MC_DialogueRow.NPC_ID;
 						Next_NPCNode->NPC_Row.TargetLevel = MainCharacterDialogueNode->MC_DialogueRow.TargetLevel;
 						
 						AddToDataTable(MainCharacterDialogueNode);
@@ -353,7 +361,7 @@ void UDialogueWriter::HandleAutomatedData(UEdGraphNode* HandledNode)
 					else if (UMainCharacterDialogue_Node* Next_PlayerDialogueNode = Cast<UMainCharacterDialogue_Node>(LinkedPin->GetOwningNode()))
 					{
 						MainCharacterDialogueNode->MC_DialogueRow.NextDialogueID = Next_PlayerDialogueNode->MC_DialogueRow.DialogueID;
-						Next_PlayerDialogueNode->MC_DialogueRow.SpeakerName = MainCharacterDialogueNode->MC_DialogueRow.SpeakerName;
+						Next_PlayerDialogueNode->MC_DialogueRow.NPC_ID = MainCharacterDialogueNode->MC_DialogueRow.NPC_ID;
 						Next_PlayerDialogueNode->MC_DialogueRow.TargetLevel = MainCharacterDialogueNode->MC_DialogueRow.TargetLevel;
 						
 						AddToDataTable(MainCharacterDialogueNode);
@@ -374,9 +382,9 @@ void UDialogueWriter::AddToDataTable(UEdGraphNode* NodeToAddDataTable)
 {
 	if (UNPC_DialogueNode* NPCNode = Cast<UNPC_DialogueNode>(NodeToAddDataTable))
 	{
-		FName TargetSpeakerID = NPCNode->NPC_Row.SpeakerName;
+		FName TargetNPC_ID = NPCNode->NPC_Row.NPC_ID;
 
-		if (UDataTable** FoundTablePtr = NPC_DataTableMap.Find(TargetSpeakerID))
+		if (UDataTable** FoundTablePtr = NPC_DataTableMap.Find(TargetNPC_ID))
 		{
 			UDataTable* TargetTable = *FoundTablePtr;
 			
@@ -498,10 +506,16 @@ void UDialogueWriter::CleanGhostNodesFromTables()
 	
 	for (const auto& Pair : NPC_DataTableMap)
 	{
+	    /*
 		if (Pair.Value) 
 		{
 			AllTablesToClean.Add(Pair.Value);
-		}
+		}*/
+		
+		if (Pair.Value && ActiveNPC_IDs.Contains(Pair.Key)) 
+        {
+        	AllTablesToClean.Add(Pair.Value);
+        }
 	}
 
 	
@@ -571,12 +585,12 @@ void UDialogueWriter::TakeNPCsDataTablesAndName()
 			
 				if (DialogueComp)
 				{
-					FName SpeakerName = DialogueComp->NPC_RealName;
+					FName npc_id = DialogueComp->NPC_ID;
 					UDataTable* FoundDataTable = DialogueComp->DataTable_NPC;
 
-					if (!SpeakerName.IsNone() && FoundDataTable != nullptr)
+					if (!npc_id.IsNone() && FoundDataTable != nullptr)
 					{
-						NPC_DataTableMap.Add(SpeakerName, FoundDataTable);
+						NPC_DataTableMap.Add(npc_id, FoundDataTable);
 						AddedCount++;
 					}
 				}

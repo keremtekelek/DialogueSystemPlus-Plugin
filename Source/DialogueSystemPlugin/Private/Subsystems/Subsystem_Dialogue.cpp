@@ -32,7 +32,7 @@ void USubsystem_Dialogue::Initialize(FSubsystemCollectionBase& Collection)
 	DSM_MainCharacter.Empty();
 	DSM_NPC.Empty();
 	
-	LastDialogueNPC_Name = NAME_None;
+	LastInteractedNPC_ID = NAME_None;
 	
 	const UDialogueSystemSettings* Settings = GetDefault<UDialogueSystemSettings>();
 	
@@ -99,7 +99,7 @@ void USubsystem_Dialogue::Interacted()
 			
 			GettingVariables();
 			
-			if (InteractedNPC_Name == LastDialogueNPC_Name)
+			if (InteractedNPCNow_ID == LastInteractedNPC_ID)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Dialogue Partner and Last Dialogue Partner are the same!"));
 				PlayDisturbDialogue();
@@ -118,7 +118,7 @@ void USubsystem_Dialogue::StartDialogue()
 	if (FilterDialogues()) 
 	{
 		IsMainCharacterInDialogue = true;
-		LastDialogueNPC_Name = InteractedNPC_Name;
+		LastInteractedNPC_ID = InteractedNPCNow_ID;
 		LockOrReleaseTheMainCharacter(true);
 		ControlDialogue();
 	}
@@ -134,7 +134,6 @@ void USubsystem_Dialogue::GettingVariables()
 {
 	if (IsValid(AC_InteractionSystem) && IsValid(AC_DialogueSystem))
 	{
-		
 		WBP_MoodMeter = AC_DialogueSystem->WBP_MoodMeter;
 
 		DataTable_NPC= AC_DialogueSystem->DataTable_NPC;
@@ -143,91 +142,92 @@ void USubsystem_Dialogue::GettingVariables()
 		Mood_NPC = AC_DialogueSystem->NPC_Mood;
 		MoodValue_NPC = AC_DialogueSystem->NPC_MoodValue;
 
-		InteractedNPC_Name = AC_DialogueSystem->NPC_RealName;
+		InteractedNPCNow_ID = AC_DialogueSystem->NPC_ID;
+		DisplayName_NPC = AC_DialogueSystem->NPC_DisplayName;
 	}
 }
 
 void USubsystem_Dialogue::ControlDialogue()
 {
-	if (NPC_EndOfDialogue)
+	if (Best_NPC_EndOfDialogue)
 	{
-		if (ProcessedDialogues.Contains(NPC_DialogueID))
+		if (ProcessedDialogues.Contains(Best_NPC_DialogueID))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ProcessedDialogues has your best NPC_DialogueID, Dialogue's EndOfDialogue = true"))
 			return;
 		}
 
-		ShowDialogue(NPC_DialogueText,NPC_ConversationPartner_Name);
-		ProcessedDialogues.AddUnique(NPC_DialogueID);
-		EventManager_Subsystem->TriggerEvent(NPC_EventsToTrigger);
+		ShowDialogue(Best_NPC_DialogueText,Best_NPC_ID);
+		ProcessedDialogues.AddUnique(Best_NPC_DialogueID);
+		EventManager_Subsystem->TriggerEvent(Best_NPC_EventsToTrigger);
 		
-		if (NPC_DialogueSound)
+		if (Best_NPC_DialogueSound)
 		{
 			FVector SoundLocation = AC_DialogueSystem->OwnerActor->GetActorLocation();
-			UGameplayStatics::PlaySoundAtLocation(this, NPC_DialogueSound,SoundLocation);
+			UGameplayStatics::PlaySoundAtLocation(this, Best_NPC_DialogueSound,SoundLocation);
 
-			GetWorld()->GetTimerManager().SetTimer(DelayCloseDialogueHandle,this, &USubsystem_Dialogue::CloseDialogueAfterSeconds,NPC_DialogueSound->Duration + 1.6f,false);
+			GetWorld()->GetTimerManager().SetTimer(DelayCloseDialogueHandle,this, &USubsystem_Dialogue::CloseDialogueAfterSeconds,Best_NPC_DialogueSound->Duration + 1.6f,false);
 		}
 		else
 		{
-			GetWorld()->GetTimerManager().SetTimer(DelayCloseDialogueHandle,this, &USubsystem_Dialogue::CloseDialogueAfterSeconds,CalculateDialogueDuration(NPC_DialogueText),false);
+			GetWorld()->GetTimerManager().SetTimer(DelayCloseDialogueHandle,this, &USubsystem_Dialogue::CloseDialogueAfterSeconds,CalculateDialogueDuration(Best_NPC_DialogueText),false);
 		}
 	}
 	else
 	{
-		if (ProcessedDialogues.Contains(NPC_DialogueID))
+		if (ProcessedDialogues.Contains(Best_NPC_DialogueID))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ProcessedDialogues has your best NPC_DialogueID, Dialogue's EndOfDialogue = false"))
 			return;
 		}
 		
-		ShowDialogue(NPC_DialogueText,NPC_ConversationPartner_Name);
-		ProcessedDialogues.AddUnique(NPC_DialogueID);
-		EventManager_Subsystem->TriggerEvent(NPC_EventsToTrigger);
+		ShowDialogue(Best_NPC_DialogueText,Best_NPC_ID);
+		ProcessedDialogues.AddUnique(Best_NPC_DialogueID);
+		EventManager_Subsystem->TriggerEvent(Best_NPC_EventsToTrigger);
 
-		if (NPC_DialogueSound)
+		if (Best_NPC_DialogueSound)
 		{
 			FVector SoundLocation = AC_DialogueSystem->OwnerActor->GetActorLocation();
-			UGameplayStatics::PlaySoundAtLocation(this, NPC_DialogueSound,SoundLocation);
+			UGameplayStatics::PlaySoundAtLocation(this, Best_NPC_DialogueSound,SoundLocation);
 
-			if (!NPC_NextDialogueID.IsNone())
+			if (!Best_NPC_NextDialogueID.IsNone())
 			{
 				if (!GetWorld()->GetTimerManager().IsTimerActive(ShowNextDialogueHandle))
 				{
-					FName NextID = NPC_NextDialogueID;
+					FName NextID = Best_NPC_NextDialogueID;
 					ShowNextDialogueDelegate.BindUObject(this, &USubsystem_Dialogue::ShowNextDialogueAfterSeconds,NextID);
-					GetWorld()->GetTimerManager().SetTimer(ShowNextDialogueHandle,ShowNextDialogueDelegate,NPC_DialogueSound->Duration + 1.6f,false);
+					GetWorld()->GetTimerManager().SetTimer(ShowNextDialogueHandle,ShowNextDialogueDelegate,Best_NPC_DialogueSound->Duration + 1.6f,false);
 				}
 			}
 			else
 			{
-				if (!NPC_NextChoiceID.IsNone())
+				if (!Best_NPC_NextChoiceID.IsNone())
 				{
-					if (FilterChoices(NPC_NextChoiceID))
+					if (FilterChoices(Best_NPC_NextChoiceID))
 					{
-						GetWorld()->GetTimerManager().SetTimer(DelayShowChoiceHandle,this, &USubsystem_Dialogue::ShowChoiceAfterSeconds,NPC_DialogueSound->Duration + 1.6f,false);
+						GetWorld()->GetTimerManager().SetTimer(DelayShowChoiceHandle,this, &USubsystem_Dialogue::ShowChoiceAfterSeconds,Best_NPC_DialogueSound->Duration + 1.6f,false);
 					}
 				}
 			}
 		}
 		else
 		{
-			if (!NPC_NextDialogueID.IsNone())
+			if (!Best_NPC_NextDialogueID.IsNone())
 			{
 				if (!GetWorld()->GetTimerManager().IsTimerActive(ShowNextDialogueHandle))
 				{
-					FName NextID = NPC_NextDialogueID;
+					FName NextID = Best_NPC_NextDialogueID;
 					ShowNextDialogueDelegate.BindUObject(this, &USubsystem_Dialogue::ShowNextDialogueAfterSeconds,NextID);
-					GetWorld()->GetTimerManager().SetTimer(ShowNextDialogueHandle,ShowNextDialogueDelegate,CalculateDialogueDuration(NPC_DialogueText),false);
+					GetWorld()->GetTimerManager().SetTimer(ShowNextDialogueHandle,ShowNextDialogueDelegate,CalculateDialogueDuration(Best_NPC_DialogueText),false);
 				}
 			}
 			else
 			{
-				if (!NPC_NextChoiceID.IsNone())
+				if (!Best_NPC_NextChoiceID.IsNone())
 				{
-					if (FilterChoices(NPC_NextChoiceID))
+					if (FilterChoices(Best_NPC_NextChoiceID))
 					{
-						GetWorld()->GetTimerManager().SetTimer(DelayShowChoiceHandle,this, &USubsystem_Dialogue::ShowChoiceAfterSeconds,CalculateDialogueDuration(NPC_DialogueText),false);
+						GetWorld()->GetTimerManager().SetTimer(DelayShowChoiceHandle,this, &USubsystem_Dialogue::ShowChoiceAfterSeconds,CalculateDialogueDuration(Best_NPC_DialogueText),false);
 					}
 				}
 			}
@@ -435,15 +435,15 @@ void USubsystem_Dialogue::GetNextChoice_RowProperties(const FMainCharacterChoice
 
 void USubsystem_Dialogue::GetBestDialogue_RowProperties(const FNPC_Dialogues& BestNPC_Row)
 {
-	NPC_DialogueID = BestNPC_Row.DialogueID;
-	NPC_DialogueText = BestNPC_Row.DialogueText;
-	NPC_DialogueSound = BestNPC_Row.DialogueSound;
-	NPC_EndOfDialogue = BestNPC_Row.EndOfDialogue;
-	NPC_EventsToTrigger = BestNPC_Row.EventsToTrigger;
-	NPC_NextDialogueID = BestNPC_Row.NextDialogueID;
-	NPC_NextChoiceID = BestNPC_Row.NextChoiceID;
-	NPC_ConversationPartner_Name = BestNPC_Row.SpeakerName;
-	NPC_HasToRequireEvents = BestNPC_Row.HasToRequireEvents;
+	Best_NPC_DialogueID = BestNPC_Row.DialogueID;
+	Best_NPC_DialogueText = BestNPC_Row.DialogueText;
+	Best_NPC_DialogueSound = BestNPC_Row.DialogueSound;
+	Best_NPC_EndOfDialogue = BestNPC_Row.EndOfDialogue;
+	Best_NPC_EventsToTrigger = BestNPC_Row.EventsToTrigger;
+	Best_NPC_NextDialogueID = BestNPC_Row.NextDialogueID;
+	Best_NPC_NextChoiceID = BestNPC_Row.NextChoiceID;
+	Best_NPC_ID = BestNPC_Row.NPC_ID;
+	Best_NPC_HasToRequireEvents = BestNPC_Row.HasToRequireEvents;
 }
 
 
@@ -496,7 +496,7 @@ void USubsystem_Dialogue::ShowNextDialogueAfterSeconds(FName NextDialogueID)
 
 		if (IsNPC)
 		{
-			ShowDialogue(FoundRow->DialogueText,FoundRow->SpeakerName);
+			ShowDialogue(FoundRow->DialogueText,FoundRow->NPC_ID);
 		}
 		else
 		{
@@ -529,7 +529,7 @@ void USubsystem_Dialogue::ShowNextDialogueAfterSeconds(FName NextDialogueID)
 		}
 		if (IsNPC)
 		{
-			ShowDialogue(FoundRow->DialogueText,FoundRow->SpeakerName);
+			ShowDialogue(FoundRow->DialogueText,FoundRow->NPC_ID);
 		}
 		else
 		{
@@ -542,7 +542,7 @@ void USubsystem_Dialogue::ShowNextDialogueAfterSeconds(FName NextDialogueID)
 		if (FoundRow->DialogueSound)
 		{
 			FVector SoundLocation = AC_DialogueSystem->OwnerActor->GetActorLocation();
-			UGameplayStatics::PlaySoundAtLocation(this, NPC_DialogueSound,SoundLocation);
+			UGameplayStatics::PlaySoundAtLocation(this, Best_NPC_DialogueSound,SoundLocation);
 
 			if (!FoundRow->NextDialogueID.IsNone())
 			{
@@ -625,24 +625,13 @@ void USubsystem_Dialogue::ShowDialogue(FText DialogueToShow,FName OwnerOfDialogu
 	}
 	else
 	{
-		if (AC_DialogueSystem->ExposeRealName)
-		{
-			FString Owner = AC_DialogueSystem->NPC_RealName.ToString();
+		FString Owner = AC_DialogueSystem->NPC_DisplayName.ToString();
 
-			FText OwnerText = FText::FromString(Owner);
-			FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
+		FText OwnerText = FText::FromString(Owner);
+		FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
 
-			WBP_Dialogue->ShowDialogue(Result);
-		}
-		else
-		{
-			FString Owner = AC_DialogueSystem->NPC_OfficialName.ToString();
-
-			FText OwnerText = FText::FromString(Owner);
-			FText Result = FText::Format(FText::FromString("{0}: {1}"),OwnerText,DialogueToShow);
-
-			WBP_Dialogue->ShowDialogue(Result);
-		}
+		WBP_Dialogue->ShowDialogue(Result);
+		
 	}
 }
 
@@ -703,7 +692,7 @@ void USubsystem_Dialogue::PlayDisturbDialogue()
 			
 					if (RandomDisturbRow)
 					{
-						ShowDialogue(RandomDisturbRow->DisturbText, InteractedNPC_Name);
+						ShowDialogue(RandomDisturbRow->DisturbText, InteractedNPCNow_ID);
 				
 						if (TimerManager.IsTimerActive(DelayCloseDialogueHandle))
 						{

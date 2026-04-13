@@ -62,6 +62,10 @@ public:
 	
 	UPROPERTY()
 	TSet<FName> ActiveIDs;
+
+	// can be adjusted
+	UPROPERTY()
+	TSet<FName> ActiveNPC_IDs;
 	
 	
 	

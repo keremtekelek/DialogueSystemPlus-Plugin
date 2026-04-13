@@ -32,10 +32,10 @@ public:
 	
 	// this property reads by dialogue writer for the npc data table map
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Changeable NPC Data")
-	FName NPC_RealName;
+	FName NPC_ID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Changeable NPC Data")
-	FName NPC_OfficialName;
+	FName NPC_DisplayName;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Changeable NPC Data")
 	int NPC_MoodValue{50};
@@ -46,9 +46,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Changeable NPC Data")
 	bool ShouldShowNPC_Mood{true};
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Changeable NPC Data")
-	bool ExposeRealName{false};
-
 	UPROPERTY()
 	AActor* OwnerActor;
 

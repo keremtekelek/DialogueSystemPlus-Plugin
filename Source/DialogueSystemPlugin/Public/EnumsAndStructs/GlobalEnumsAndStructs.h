@@ -43,7 +43,7 @@ struct FNPC_Dialogues : public FTableRowBase
 	FText DialogueText;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
-    FName SpeakerName;
+    FName NPC_ID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USoundBase* DialogueSound;
@@ -112,7 +112,7 @@ struct FChoice1
 	FGameplayTagContainer EventsToTrigger;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Auto Generated Choice Data") 
-    FName SpeakerName;
+    FName NPC_ID;
 
 	UPROPERTY(BlueprintReadOnly,Category="Auto Generated Choice Data") 
 	bool EndOfDialogue = false;
@@ -142,7 +142,7 @@ struct FChoice2
 	FGameplayTagContainer EventsToTrigger;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Auto Generated Choice Data") 
-    FName SpeakerName;
+    FName NPC_ID;
 
 	UPROPERTY(BlueprintReadOnly,Category="Auto Generated Choice Data") 
 	bool EndOfDialogue = false;
@@ -173,7 +173,7 @@ struct FChoice3
 	FGameplayTagContainer EventsToTrigger;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Auto Generated Choice Data") 
-    FName SpeakerName;
+    FName NPC_ID;
 
 	UPROPERTY(BlueprintReadOnly,Category="Auto Generated Choice Data") 
 	bool EndOfDialogue = false;

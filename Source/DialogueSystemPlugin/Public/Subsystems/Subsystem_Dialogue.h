@@ -75,7 +75,10 @@ public:
 	ENPCMood Mood_NPC;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Data")
-	FName InteractedNPC_Name;
+	FName DisplayName_NPC;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NPC Data")
+	FName InteractedNPCNow_ID; //*
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Main Character Data")
 	TMap<FName, int32> DSM_MainCharacter;
@@ -106,31 +109,33 @@ public:
 	//Best NPC Row Properties
 
 	UPROPERTY()
-	FName NPC_DialogueID;
+	FName Best_NPC_DialogueID;
 	
 	UPROPERTY()
-	FName NPC_NextDialogueID;
+	FName Best_NPC_NextDialogueID;
 	
 	UPROPERTY()
-	FName NPC_NextChoiceID;
+	FName Best_NPC_NextChoiceID;
 	
 	UPROPERTY()
-	FText NPC_DialogueText;
+	FText Best_NPC_DialogueText;
 
 	UPROPERTY()
-	USoundBase* NPC_DialogueSound;
+	USoundBase* Best_NPC_DialogueSound;
 
 	UPROPERTY()
-	bool NPC_EndOfDialogue;
+	bool Best_NPC_EndOfDialogue;
 
 	UPROPERTY()
-	FGameplayTagContainer NPC_EventsToTrigger;
+	FGameplayTagContainer Best_NPC_EventsToTrigger;
 	
 	UPROPERTY()
-	FGameplayTagContainer NPC_HasToRequireEvents;
+	FGameplayTagContainer Best_NPC_HasToRequireEvents;
 
 	UPROPERTY()
-	FName NPC_ConversationPartner_Name;
+	FName Best_NPC_ID;  //*
+
+	
 	
 	//Best Main Character Choice Row Properties
 
@@ -217,13 +222,10 @@ public:
 	bool IsMainCharacterInDialogue = false;
 	
 	UPROPERTY()
-	FName LastDialogueNPC_Name;
+	FName LastInteractedNPC_ID; //*
 
 	UPROPERTY()
 	FName PlayerCharacter_Name;
-	
-	//UPROPERTY()
-	//TSoftObjectPtr<UDataTable> DT_Disturb;
 	
 	UPROPERTY()
 	APlayerController* PlayerController;

@@ -124,13 +124,13 @@ void UMainCharacterChoices_Node::PostEditImport()
 			this->AllChoice_Row.Choice3.ChoiceID3 = FName(*FGuid::NewGuid().ToString());
 			
 			this->AllChoice_Row.Choice1.EndOfDialogue = false;
-			this->AllChoice_Row.Choice1.SpeakerName = NAME_None;
+			this->AllChoice_Row.Choice1.NPC_ID = NAME_None;
 
 			this->AllChoice_Row.Choice2.EndOfDialogue = false;
-			this->AllChoice_Row.Choice2.SpeakerName = NAME_None;
+			this->AllChoice_Row.Choice2.NPC_ID = NAME_None;
 
 			this->AllChoice_Row.Choice3.EndOfDialogue = false;
-			this->AllChoice_Row.Choice3.SpeakerName = NAME_None;
+			this->AllChoice_Row.Choice3.NPC_ID = NAME_None;
 			
 			this->AllChoice_Row.Choice1.NextDialogueID = NAME_None;
 			this->AllChoice_Row.Choice2.NextDialogueID = NAME_None;
