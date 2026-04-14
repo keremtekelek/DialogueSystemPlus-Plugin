@@ -38,8 +38,6 @@ void USubsystem_Dialogue::Initialize(FSubsystemCollectionBase& Collection)
 	
 	if (Settings)
 	{
-		DataTable_MainCharacter = Settings->DT_MainCharacterChoices.LoadSynchronous();
-		DataTable_MainCharacterDialogue = Settings->DT_MainCharacterDialogues.LoadSynchronous();
 		PlayerCharacter_Name = Settings->PlayerCharacterName;
 	}
 }
@@ -145,7 +143,35 @@ void USubsystem_Dialogue::GettingVariables()
 		InteractedNPCNow_ID = AC_DialogueSystem->NPC_ID;
 		DisplayName_NPC = AC_DialogueSystem->NPC_DisplayName;
 	}
+
+	const UDialogueSystemSettings* Settings = GetDefault<UDialogueSystemSettings>();
+
+	if (Settings)
+	{
+		for (const auto& Pair : Settings->DT_MainCharacterChoicesMap)
+		{
+			FString MapInSettings = FPackageName::GetShortName(Pair.Key.GetLongPackageName());
+			
+			if (MapInSettings == GetCurrentMap())
+			{
+				DataTable_MainCharacter = Pair.Value.LoadSynchronous();
+				break; 
+			}
+		}
+
+		for (const auto& Pair : Settings->DT_MainCharacterDialogueMap)
+		{
+			FString MapInSettings = FPackageName::GetShortName(Pair.Key.GetLongPackageName());
+			
+			if (MapInSettings == GetCurrentMap())
+			{
+				DataTable_MainCharacterDialogue = Pair.Value.LoadSynchronous();
+				break;
+			}
+		}
+	}
 }
+
 
 void USubsystem_Dialogue::ControlDialogue()
 {

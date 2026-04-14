@@ -31,8 +31,7 @@ void UDialogueWriter::GenerateDialogueData()
 	RootNPC_Nodes.Empty(); 
 	ActiveIDs.Empty();
 
-	//can be adjusted
-	ActiveNPC_IDs.Empty();
+	
 
 	
 	
@@ -156,7 +155,6 @@ void UDialogueWriter::GenerateDialogueData()
 	for (UNPC_DialogueNode* Node : RootNPC_Nodes)
 	{
 		Node->NPC_Row.IsRoot = true;
-		ActiveNPC_IDs.Add(Node->NPC_Row.NPC_ID); // can be adjusted
 		HandleAutomatedData(Node);
 	}
 
@@ -506,16 +504,10 @@ void UDialogueWriter::CleanGhostNodesFromTables()
 	
 	for (const auto& Pair : NPC_DataTableMap)
 	{
-	    /*
 		if (Pair.Value) 
 		{
 			AllTablesToClean.Add(Pair.Value);
-		}*/
-		
-		if (Pair.Value && ActiveNPC_IDs.Contains(Pair.Key)) 
-        {
-        	AllTablesToClean.Add(Pair.Value);
-        }
+		}
 	}
 
 	
@@ -552,14 +544,6 @@ void UDialogueWriter::TakeNPCsDataTablesAndName()
 {
 #if WITH_EDITOR
 	
-	const UDialogueSystemSettings* Settings = GetDefault<UDialogueSystemSettings>();
-	
-	if (Settings)
-	{
-		DT_MainCharacterChoices = Settings->DT_MainCharacterChoices.LoadSynchronous();
-		DT_MainCharacterDialogues = Settings->DT_MainCharacterDialogues.LoadSynchronous();
-	}
-	
 	UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	
 	if (!EditorWorld)
@@ -570,28 +554,47 @@ void UDialogueWriter::TakeNPCsDataTablesAndName()
 
 	int AddedCount = 0;
 
+	UBlueprint* BP_DialogueWriter = Cast<UBlueprint>(this->GetClass()->ClassGeneratedBy);
+	
+	TArray<FName> ActiveNPC_IDs;
+	ActiveNPC_IDs.Empty();
+
+	for (UEdGraph* Graph : BP_DialogueWriter->UbergraphPages)
+	{
+		if (!Graph) continue;
+
+		for (UEdGraphNode* Node : Graph->Nodes)
+		{
+			if (UNPC_DialogueNode* NPC_Node = Cast<UNPC_DialogueNode>(Node))
+			{
+				ActiveNPC_IDs.AddUnique(NPC_Node->NPC_Row.NPC_ID);
+			}
+		}
+	}
+
+	
 	for (TActorIterator<AActor> ActorItr(EditorWorld); ActorItr; ++ActorItr)
 	{
 		AActor* Actor = *ActorItr;
 		if (Actor)
 		{
-			if (Actor->Implements<UInterface_MainCharacter>())
-			{
-				
-			}
-			else
+			if (!Actor->Implements<UInterface_MainCharacter>())
 			{
 				UAC_DialogueSystem* DialogueComp = Actor->FindComponentByClass<UAC_DialogueSystem>();
 			
 				if (DialogueComp)
 				{
 					FName npc_id = DialogueComp->NPC_ID;
-					UDataTable* FoundDataTable = DialogueComp->DataTable_NPC;
 
-					if (!npc_id.IsNone() && FoundDataTable != nullptr)
+					if (ActiveNPC_IDs.Contains(npc_id))
 					{
-						NPC_DataTableMap.Add(npc_id, FoundDataTable);
-						AddedCount++;
+						UDataTable* FoundDataTable = DialogueComp->DataTable_NPC;
+
+						if (!npc_id.IsNone() && FoundDataTable != nullptr)
+						{
+							NPC_DataTableMap.Add(npc_id, FoundDataTable);
+							AddedCount++;
+						}
 					}
 				}
 			}
@@ -602,10 +605,7 @@ void UDialogueWriter::TakeNPCsDataTablesAndName()
 	{
 		this->Modify(); 
 	}
-	else
-	{
-		
-	}
+	
 #endif
 }
 
